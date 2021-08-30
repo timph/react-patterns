@@ -1,0 +1,56 @@
+[user]
+        name = Tim Pham
+        email = tim_ph@yahoo.com
+[core]
+        editor = vi
+        excludesfile = /Users/timpham/.gitignore_global
+        ignorecase = false
+[color]
+        ui = true
+[push]
+        default = matching
+[credential]
+        helper = osxkeychain
+[pull]
+        rebase = true
+[fetch]
+        prune = true
+[diff]
+        colorMoved = zebra
+[alias]
+        st = status
+        br = branch
+        co = checkout
+        ci = commit
+        com = commit -m
+        up = rebase
+        cp = cherry-pick
+        one = log --oneline --decorate
+        dif = git diff --word-diff
+        hist = log --pretty=format:\"%h %ad | %s%d [%an]\" --graph --date=short
+        show = show --pretty=format:\"%h %s\" 
+        type = cat-file -t
+        dump = cat-file -p
+        fall = fetch --all --prune
+        track = branch -u
+        po = push origin
+        pud = pull upstream develop
+        pod = pull origin develop
+        pul = pull upstream release
+        pum = pull upstream master
+        pom = pull origin master
+        mergeupstream = pull --rebase upstream develop
+        pr  = "!f() { git fetch -fu ${2:-upstream} refs/pull/$1/head:pr/$1 && git checkout pr/$1; }; f"
+        pro = "!f() { git fetch -fu ${2:-origin} refs/pull/$1/head:pr/$1 && git checkout pr/$1; }; f"
+        pr-clean = "!git for-each-ref refs/heads/pr/* --format='%(refname)' | while read ref ; do branch=${ref#refs/heads/} ; git branch -D $branch ; done"
+        please = push --force-with-lease
+        commend = commit --amend --no-edit
+        s = status --short --branch
+        glog = log --graph --abbrev-commit --decorate --all --format=format:\"%C(bold blue)%h%C(reset) - %C(bold cyan)%aD%C(dim white) - %an%C(reset) %C(bold green)(%ar)%C(reset)%C(bold yellow)%d%C(reset)%n %C(white)%s%C(reset)\"
+
+[difftool "sourcetree"]
+        cmd = opendiff \"$LOCAL\" \"$REMOTE\"
+        path = 
+[mergetool "sourcetree"]
+        cmd = /Applications/SourceTree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
+        trustExitCode = true
