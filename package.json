@@ -16,8 +16,24 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
+    "start2": "node bin/build-start.js craco start",
+    "start:proposed": "node bin/build-start.js craco start --schema proposed",
+    "start:mocks": "node bin/build-start.js craco start --schema proposed --mocks",
+    "build": "node bin/build-start.js craco build",
+    "test2": "cross-env NODE_ENV=test node bin/build-start.js karma start",
+    "test:coverage": "cross-env NODE_ENV=test COVERAGE=true node bin/build-start.js karma start",
+    "problems": "node bin/build-start.js tsc --noEmit",
+    "lint": "eslint --ignore-path .gitignore \"**/{src,test}/**/*.{js,ts}*\"",
+    "lint:style": "stylelint \"**/src/**/*.{js,tsx,ts}\"",
+    "publish-queries": "yarn relay:persist && yarn persist-queries",
+    "_upload-coverage": "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
+    "relay": "node bin/build-start.js relay-compiler",
+    "relay:proposed": "node bin/build-start.js relay-compiler --schema proposed",
+    "relay:persist": "relay-compiler --persist-output ./queryMap.json",
+    "persist-queries": "persist-queries -q ./queryMap.json",
     "signature-check": "node validate-packages.js | grep 'Signature Error'",
-    "signature-check:dev": "node validate-packages.js devDependencies| grep 'Signature Error'"    
+    "signature-check:dev": "node validate-packages.js devDependencies| grep 'Signature Error'",
+    "view-coverage": "serve -c serve.coverage.json" 
   },
   "eslintConfig": {
     "extends": "react-app"
