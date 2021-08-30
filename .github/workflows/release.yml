@@ -1,0 +1,114 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - develop
+
+env:
+  GITHUB_TOKEN: ${{ secrets.TOKEN }}
+  AUTH0_JWKS_URI: http://localhost:3000/.well-known/jwks.json
+  PORT: 8080
+
+jobs:
+  test:
+    name: Tests
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        node: [12]
+
+    services:
+      postgres:
+        image: postgres:10.8
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_INITDB_ARGS: "--encoding=UTF8"
+        ports:
+          - 5432:5432
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      - run: yarn install
+      - run: yarn generate
+      - run: yarn migrate
+        env:
+          POSTGRES_ADMIN_USER_NAME: postgres
+          POSTGRES_ADMIN_PASSWORD: postgres
+          POSTGRES_HOST: localhost
+      - name: Run Tests
+        run: yarn test
+        env:
+          DATABASE_URL: postgresql://runtime:runtime_password@localhost:5432/test?schema=public
+      - name: Mock Tests
+        run: yarn test
+        env:
+          MOCK: 1
+
+  types:
+    name: Types
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        node: [12]
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      - run: yarn install
+      - run: yarn generate
+      - run: yarn problems
+
+  lint:
+    name: Linter
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        node: [12]
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      - run: yarn install
+      - run: yarn lint
+
+  publish-gpr:
+    name: Publish GPR
+    needs: [test, lint, types]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Use Node.js 12
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12
+          registry-url: https://npm.pkg.github.com/
+          scope: "@resideo"
+          always-auth: true
+      - run: yarn install
+      - run: yarn build
+      - name: Set to current version
+        run: yarn \#:version:current
+      - name: Increment version
+        run: yarn \#:version:next
+      - name: Publish release to registry
+        run: npm publish
