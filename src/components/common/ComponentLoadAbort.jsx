@@ -30,5 +30,20 @@ function ComponentLoadAbort () {
       });
   }
 
+  // If the fetch call is in useEffect() only, this is simplier
+  useEffect(() => {
+    const abortController = new AbortController();
+    const signal = abortController.signal;
+    fetch('http://some-url/to-get-data', { signal })
+      .then(r => r.json())
+      .then(data => {
+        setData(data);
+      });
+    // Abort during cleanup
+    return () => {
+      abortController.abort();
+    };
+  }, []);
+
   return null;
 }
